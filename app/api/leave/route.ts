@@ -1,5 +1,5 @@
 import { databaseConflict } from '../../lib/conflicts';
-import { getChatGPTUser } from '../../chatgpt-auth';
+import { getPlatformUser } from '../../platform-auth';
 import {
   dayInZone,
   effectiveSchedule,
@@ -170,7 +170,7 @@ function canReview(actor: Person, employee: Person) {
 }
 
 async function session(req: Request) {
-  const owner = await getChatGPTUser();
+  const owner = await getPlatformUser();
   requireValue(owner, 'Sign in first.', 401);
   const current = await context(req, owner.userId);
   requireValue(current, 'Your session has ended. Sign in again.', 401);

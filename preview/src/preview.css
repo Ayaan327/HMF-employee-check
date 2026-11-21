@@ -5,3 +5,8 @@
 @media (max-width:640px){.preview-bar{font-size:12px;gap:.15rem .6rem;padding:.35rem .75rem}.preview-bar code{font-size:11px}}
 .preview-bar [hidden]{display:none!important}
 #preview-reset-confirm button{margin-left:.5rem;font-weight:600}
+.preview-bar button[aria-pressed='true']{font-weight:700;text-decoration:none}
+.ms-picker{display:grid;gap:.75rem}
+.ms-accounts{display:grid;gap:.5rem}
+.ms-accounts .secondary{display:grid;justify-items:start;gap:2px;text-align:left;white-space:normal;height:auto;padding:10px 14px}
+.ms-accounts small{color:var(--muted);font-weight:400}

@@ -242,3 +242,23 @@ export const leaveBalanceVersions = sqliteTable('leave_balance_versions', {
     .references(() => employees.id),
   revision: integer('revision').notNull(),
 });
+
+// Which verified sign-in identity (e.g. a Microsoft 365 account via Cloudflare Access)
+// opened which employee record. Additive: password sessions are unaffected.
+export const identityLinks = sqliteTable(
+  'identity_links',
+  {
+    provider: text('provider').notNull(),
+    subject: text('subject').notNull(),
+    employeeId: text('employee_id')
+      .notNull()
+      .references(() => employees.id),
+    email: text('email').notNull(),
+    linkedAt: text('linked_at').notNull(),
+    lastSeenAt: text('last_seen_at').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.provider, t.subject] }),
+    index('identity_links_employee').on(t.employeeId),
+  ],
+);

@@ -1,5 +1,7 @@
 # HMF-owned hosting, Microsoft 365 sign-in and company domain — assessment
 
+> **Update 2026-11-21:** Steps B1 and B2 are now implemented in code (`app/lib/identity.ts`, `app/platform-auth.ts`, the `sso` action, `identity_links`). The Sites header gate in section 2, item 1, is replaced: production fails closed unless `HMF_AUTH_MODE` is set. Step A has ready-made settings and a guide in `deploy/README.md`. What remains needs HMF's real Cloudflare and Microsoft accounts.
+
 Date: 2026-11-21. Based on the current source in this folder. Nothing has been deployed, no DNS has been changed and no live data has been moved.
 
 ## 1. Where things stand

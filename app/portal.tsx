@@ -99,7 +99,12 @@ type ApiData = {
   refreshedAt: string;
   error?: string;
   signIn?: boolean;
+  auth?: AuthInfo;
+  identityEmail?: string;
 };
+type AuthInfo = { mode: string; sso: boolean; signOutUrl: string | null };
+// Set from the server's answers; decides where an expired session sends the browser.
+let authMode = 'sites';
 const officeName = (o: string) => (o === 'PK' ? 'Pakistan' : o === 'UK' ? 'United Kingdom' : o);
 const zone = (o: string) => (o === 'PK' ? 'Asia/Karachi' : 'Europe/London');
 const labels: Record<string, string> = {
@@ -159,7 +164,11 @@ async function api(action: string, body?: object, query = '') {
   );
   const data = (await response.json()) as ApiData;
   if (!response.ok) {
-    if (data.signIn) window.location.assign('/signin-with-chatgpt?return_to=/');
+    if (data.signIn) {
+      // Sites serves its own sign-in route; behind Cloudflare Access a reload re-authenticates.
+      if (authMode === 'sites') window.location.assign('/signin-with-chatgpt?return_to=/');
+      else window.location.reload();
+    }
     throw new Error(data.error || 'Please sign in again.');
   }
   return data;
@@ -169,16 +178,39 @@ export default function Portal() {
     [loading, setLoading] = useState(true),
     [fatal, setFatal] = useState(''),
     [today, setToday] = useState(''),
-    [officeDates, setOfficeDates] = useState<Record<string, string>>({});
+    [officeDates, setOfficeDates] = useState<Record<string, string>>({}),
+    [auth, setAuth] = useState<AuthInfo | null>(null),
+    [identityEmail, setIdentityEmail] = useState('');
+  function signedIn(d: ApiData) {
+    setMe(d.user);
+    setToday(d.today);
+    setOfficeDates(d.officeDates);
+    if (d.auth) {
+      setAuth(d.auth);
+      authMode = d.auth.mode;
+    }
+    setFatal('');
+  }
+  // Microsoft 365 single sign-on: the platform has already verified who this is.
+  async function microsoftSignIn() {
+    try {
+      signedIn(await api('sso', {}));
+    } catch (e) {
+      setFatal((e as Error).message);
+    }
+  }
   useEffect(() => {
     fetch('/api/portal?action=me', { cache: 'no-store' })
       .then(async (r) => {
         const d = (await r.json()) as ApiData;
-        if (d.user) {
-          setMe(d.user);
-          setToday(d.today);
-          setOfficeDates(d.officeDates);
-        } else if (r.status !== 401) setFatal(d.error || 'Unable to load the portal.');
+        if (d.auth) {
+          setAuth(d.auth);
+          authMode = d.auth.mode;
+        }
+        if (d.identityEmail) setIdentityEmail(d.identityEmail);
+        if (d.user) signedIn(d);
+        else if (r.status === 401 && d.auth?.sso) await microsoftSignIn();
+        else if (r.status !== 401) setFatal(d.error || 'Unable to load the portal.');
       })
       .catch(() => setFatal('Unable to reach the attendance service. Please refresh.'))
       .finally(() => setLoading(false));
@@ -186,7 +218,10 @@ export default function Portal() {
   async function logout() {
     try {
       await api('logout', {});
-      setMe(null);
+      // Behind Microsoft 365 sign-in, also end the Cloudflare Access session; otherwise the
+      // next visit would sign the same person straight back in.
+      if (auth?.signOutUrl) window.location.assign(auth.signOutUrl);
+      else setMe(null);
     } catch (e) {
       setFatal((e as Error).message);
     }
@@ -202,13 +237,9 @@ export default function Portal() {
   if (!me)
     return (
       <Login
-        onLogin={(d) => {
-          setMe(d.user);
-          setToday(d.today);
-          setOfficeDates(d.officeDates);
-          setFatal('');
-        }}
+        onLogin={signedIn}
         initialError={fatal}
+        sso={auth?.sso ? { email: identityEmail, retry: microsoftSignIn } : null}
       />
     );
   return (
@@ -226,14 +257,24 @@ function Logo() {
     />
   );
 }
-function Login({ onLogin, initialError }: { onLogin: (d: any) => void; initialError: string }) {
+function Login({
+  onLogin,
+  initialError,
+  sso,
+}: {
+  onLogin: (d: any) => void;
+  initialError: string;
+  sso: { email: string; retry: () => Promise<void> } | null;
+}) {
   const [step, setStep] = useState(1),
     [email, setEmail] = useState(''),
     [password, setPassword] = useState(''),
     [office, setOffice] = useState('assigned'),
     [show, setShow] = useState(false),
     [busy, setBusy] = useState(false),
-    [error, setError] = useState(initialError);
+    [error, setError] = useState(initialError),
+    [showPassword, setShowPassword] = useState(false);
+  useEffect(() => setError(initialError), [initialError]);
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
@@ -255,8 +296,41 @@ function Login({ onLogin, initialError }: { onLogin: (d: any) => void; initialEr
       <header className="login-brand">
         <Logo />
       </header>
-      <section className="simple-login-form">
-        <h1>{step === 1 ? 'Attendance' : 'Enter your password'}</h1>
+      {sso && (
+        <section className="simple-login-form">
+          <h1>Attendance</h1>
+          <p className="muted">
+            {sso.email
+              ? `Signed in to Microsoft 365 as ${sso.email}.`
+              : 'Sign in with your HMF Microsoft 365 account.'}
+          </p>
+          {error && (
+            <div className="error" role="alert">
+              {error}
+            </div>
+          )}
+          <button
+            className="primary login-submit"
+            disabled={busy}
+            onClick={async () => {
+              setBusy(true);
+              setError('');
+              await sso.retry();
+              setBusy(false);
+            }}
+          >
+            {busy ? 'Signing in…' : 'Continue with Microsoft 365'}
+            <ArrowRight size={18} />
+          </button>
+          <p className="secure-note">
+            Not you? <a href="/cdn-cgi/access/logout">Use a different Microsoft account</a>
+          </p>
+        </section>
+      )}
+      <section className="simple-login-form" hidden={Boolean(sso) && !showPassword}>
+        <h1>
+          {step === 1 ? (sso ? 'Administrator sign-in' : 'Attendance') : 'Enter your password'}
+        </h1>
         <p className="muted">
           {step === 1 ? 'Sign in with your company email.' : 'Use your assigned password.'}
         </p>
@@ -327,6 +401,11 @@ function Login({ onLogin, initialError }: { onLogin: (d: any) => void; initialEr
           </button>
         </form>
       </section>
+      {sso && !showPassword && (
+        <button className="text-button login-alternative" onClick={() => setShowPassword(true)}>
+          Sign in with an administrator password instead
+        </button>
+      )}
       <footer className="simple-login-footer fine-print">
         Private demo · HMF Consultants
         <br />

@@ -1,6 +1,6 @@
 import { env } from 'cloudflare:workers';
 import { databaseConflict } from '../../lib/conflicts';
-import { getChatGPTUser } from '../../chatgpt-auth';
+import { authConfig, clientAuth, getPlatformUser } from '../../platform-auth';
 import { dateRange } from '../../lib/hours';
 import {
   csv,
@@ -159,11 +159,11 @@ async function seed() {
 
 export async function GET(req: Request) {
   try {
-    const owner = await getChatGPTUser();
+    const owner = await getPlatformUser();
     if (!owner)
       return json({ error: 'Please sign in to open this private preview.', signIn: true }, 401);
     const ctx = await context(req, owner.userId);
-    if (!ctx) return json({ user: null }, 401);
+    if (!ctx) return json({ user: null, auth: clientAuth(), identityEmail: owner.email }, 401);
     const { me, people } = ctx;
     const query = new URL(req.url).searchParams,
       action = query.get('action') || 'me';
@@ -172,6 +172,7 @@ export async function GET(req: Request) {
         user: publicPerson(me),
         today: dayInZone(me.timezone),
         officeDates: await officeDates(),
+        auth: clientAuth(),
       });
     if (action === 'mine')
       return json({ today: dayInZone(me.timezone), records: await attendanceRows(me, me) });
@@ -351,7 +352,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const owner = await getChatGPTUser();
+    const owner = await getPlatformUser();
     if (!owner)
       return json({ error: 'Please sign in to open this private preview.', signIn: true }, 401);
     requireValue(
@@ -415,6 +416,13 @@ export async function POST(req: Request) {
         401,
       );
       requireValue(
+        owner.provider !== 'cloudflare-access' ||
+          authConfig().passwordLogin === 'all' ||
+          person.roles.includes('system_admin'),
+        'Sign in with your Microsoft 365 account. Password sign-in is reserved for system administrators.',
+        403,
+      );
+      requireValue(
         !body.office ||
           body.office === 'assigned' ||
           (await settings()).offices.some((o) => o.code === body.office),
@@ -448,6 +456,82 @@ export async function POST(req: Request) {
           user: publicPerson(person),
           today: dayInZone(person.timezone),
           officeDates: await officeDates(),
+        },
+        200,
+        { 'Set-Cookie': cookie(req, token, 8 * 3600) },
+      );
+    }
+    if (body.action === 'sso') {
+      // Microsoft 365 single sign-on: Cloudflare Access has already verified the person, so
+      // open the employee record that belongs to that verified identity. No password involved.
+      requireValue(
+        owner.provider === 'cloudflare-access',
+        'Microsoft 365 sign-in is not enabled for this site.',
+        400,
+      );
+      await seed();
+      const stamp = Date.now();
+      const link = await db()
+        .prepare('SELECT employee_id FROM identity_links WHERE provider=? AND subject=?')
+        .bind(owner.provider, owner.userId)
+        .first<{ employee_id: string }>();
+      const people = await directory();
+      // A link made earlier wins only while it still points at the same email; otherwise the
+      // verified email decides, so HR changing an employee's email moves sign-in with it.
+      const linked = link ? people.find((p) => p.id === link.employee_id) : undefined;
+      const person =
+        linked && linked.email.toLowerCase() === owner.email
+          ? linked
+          : people.find((p) => p.email.toLowerCase() === owner.email);
+      requireValue(
+        person &&
+          person.active === 1 &&
+          person.profile.employmentStatus === 'active' &&
+          (!person.profile.endDate || person.profile.endDate >= dayInZone(person.timezone)),
+        `Your Microsoft 365 account (${owner.email}) is not linked to an active HMF employee. Ask HR to check the email address on your employee record.`,
+        403,
+      );
+      const token = crypto.randomUUID() + crypto.randomUUID();
+      const relinked = link && link.employee_id !== person.id;
+      await db().batch([
+        db().prepare('DELETE FROM sessions WHERE expires_at<?').bind(stamp),
+        db()
+          .prepare(
+            'INSERT INTO identity_links(provider,subject,employee_id,email,linked_at,last_seen_at) VALUES (?,?,?,?,?,?) ON CONFLICT(provider,subject) DO UPDATE SET employee_id=excluded.employee_id,email=excluded.email,last_seen_at=excluded.last_seen_at,linked_at=CASE WHEN identity_links.employee_id=excluded.employee_id THEN identity_links.linked_at ELSE excluded.linked_at END',
+          )
+          .bind(owner.provider, owner.userId, person.id, owner.email, now(), now()),
+        ...(!link || relinked
+          ? [
+              audit(
+                person.id,
+                person.id,
+                'identity_linked',
+                relinked ? { employeeId: link.employee_id } : null,
+                { provider: owner.provider, email: owner.email },
+                relinked
+                  ? 'Microsoft 365 sign-in moved to this employee record (matching email)'
+                  : 'First Microsoft 365 sign-in linked to this employee record',
+                'sso',
+              ),
+            ]
+          : []),
+        db()
+          .prepare(
+            'INSERT INTO sessions(token_hash,employee_id,owner_id,expires_at) VALUES (?,?,?,?)',
+          )
+          .bind(await digest(token), person.id, owner.userId, stamp + 8 * 3600000),
+        db()
+          .prepare(
+            'INSERT INTO access_events(id,employee_id,event,occurred_at,office) VALUES (?,?,?,?,?)',
+          )
+          .bind(crypto.randomUUID(), person.id, 'sign_in', now(), person.office),
+      ]);
+      return json(
+        {
+          user: publicPerson(person),
+          today: dayInZone(person.timezone),
+          officeDates: await officeDates(),
+          auth: clientAuth(),
         },
         200,
         { 'Set-Cookie': cookie(req, token, 8 * 3600) },

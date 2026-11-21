@@ -1,6 +1,6 @@
 import { availability } from '../../lib/availability';
 import { databaseConflict } from '../../lib/conflicts';
-import { getChatGPTUser } from '../../chatgpt-auth';
+import { getPlatformUser } from '../../platform-auth';
 import {
   csv,
   dayInZone,
@@ -96,7 +96,7 @@ function writeRecord(
 
 export async function GET(req: Request) {
   try {
-    const owner = await getChatGPTUser();
+    const owner = await getPlatformUser();
     requireValue(owner, 'Sign in first.', 401);
     const ctx = await context(req, owner.userId);
     requireValue(ctx, 'Your session has ended. Sign in again.', 401);
@@ -279,7 +279,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const owner = await getChatGPTUser();
+    const owner = await getPlatformUser();
     requireValue(owner, 'Sign in first.', 401);
     requireValue(
       req.headers.get('origin') === new URL(req.url).origin,

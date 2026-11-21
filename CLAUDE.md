@@ -36,8 +36,10 @@ Shims live in `preview/src/` (D1 adapter, cookie/origin handling). Not deployabl
 - Preserve existing features, interface and workflows unless Ayaan asks for changes.
 - Migrations are additive only. Never reset a database or replay migrations against existing data.
 - Keep audit trails, privacy redaction, office-local dates, role/scope checks and concurrency guards intact.
-- `app/chatgpt-auth.ts` trusts platform-injected `oai-authenticated-user-*` headers. That is only safe on OpenAI Sites.
-  **Do not deploy anywhere else until that gate is replaced** (see the assessment doc). Never remove authentication.
+- Sign-in: `app/lib/identity.ts` (pure, unit-tested) + `app/platform-auth.ts`. `HMF_AUTH_MODE` = `cloudflare-access`
+  (HMF hosting: verified Access JWT + Microsoft 365 SSO via the `sso` action) or `sites` (legacy platform / local dev).
+  Unset in production = every request refused. Never trust identity headers outside `sites` mode. Never remove authentication.
+- HMF deployment: `deploy/README.md`, `deploy/*.json`, `scripts/make-deploy-config.mjs`, `scripts/first-admin-sql.mjs`.
 - Never deploy, migrate live data or change DNS without Ayaan's explicit go-ahead.
 - No real employee data, secrets, `.dev.vars` or `.env` files in the repo. Do not invent statutory leave/working-time policy.
 - Record significant decisions in `docs/DECISIONS.md`; keep `docs/TODO.md` current.

@@ -582,6 +582,18 @@ form {
   height: 34px;
   color: var(--muted);
 }
+.simple-login {
+  row-gap: var(--s4);
+}
+.simple-login > .login-brand {
+  margin-bottom: var(--s2);
+}
+.login-alternative {
+  justify-self: center;
+}
+.simple-login-form[hidden] {
+  display: none;
+}
 .simple-login-footer {
   margin-top: var(--s6);
   text-align: center;

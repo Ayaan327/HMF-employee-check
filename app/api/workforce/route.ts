@@ -1,5 +1,5 @@
 import { databaseConflict } from '../../lib/conflicts';
-import { getChatGPTUser } from '../../chatgpt-auth';
+import { getPlatformUser } from '../../platform-auth';
 import {
   blankProfile,
   csv,
@@ -71,7 +71,7 @@ function targetFor(me: Person, people: Person[], id: string) {
 
 export async function GET(req: Request) {
   try {
-    const owner = await getChatGPTUser();
+    const owner = await getPlatformUser();
     requireValue(owner, 'Sign in to open this private demo.', 401);
     const ctx = await context(req, owner.userId);
     requireValue(ctx, 'Your session has ended. Please sign in again.', 401);
@@ -498,7 +498,7 @@ async function employeeStatements(
 
 export async function POST(req: Request) {
   try {
-    const owner = await getChatGPTUser();
+    const owner = await getPlatformUser();
     requireValue(owner, 'Sign in to open this private demo.', 401);
     requireValue(
       req.headers.get('origin') === new URL(req.url).origin,

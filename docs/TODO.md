@@ -16,16 +16,18 @@
 - [ ] Leave and working-time policy values
 
 ## Engineering, can start now
-- [ ] Replace `app/chatgpt-auth.ts` platform gate with a verified Cloudflare Access JWT check plus a local mock (required before any deploy)
-- [ ] Add staging/production Wrangler configs with `migrations_dir: "drizzle"` (placeholder IDs until account exists)
-- [ ] Additive `identity_links` table and SSO-linked sessions; break-glass admin
+- [x] Replace the Sites-only gate with verified Cloudflare Access JWT checks (fails closed)
+- [x] Microsoft 365 SSO into employee sessions, `identity_links` table, break-glass admin password
+- [x] Staging/production deploy settings, generator, setup guide (`deploy/README.md`), first-admin script
+- [ ] Run the staging setup on HMF's real Cloudflare + Entra (needs HMF accounts)
+- [ ] Admin UI to view/remove a Microsoft sign-in link (links are audited; currently managed by email)
 - [ ] Backup export script and restore drill procedure
 - [ ] Put this folder in an HMF GitHub repo so CI runs
 
 ## Cleanup
 - [ ] Preview limitation: CSV downloads are blocked by the claude.ai viewer (work in the real app)
 - [ ] Lint: 56 errors (43 `no-explicit-any`, 13 `react-hooks/set-state-in-effect`) in app code; not in CI
-- [ ] Remove unused Sites connector-preview scaffolding after the auth swap
+- [ ] Remove unused Sites connector-preview scaffolding and the `sites` mode once HMF hosting is live
 - [ ] Rename package from `site-creator-vinext-starter`
 
 ## Later features

@@ -25,6 +25,7 @@ export default defineConfig({
     alias: [
       { find: 'cloudflare:workers', replacement: here('./src/shims/cloudflare-workers.ts') },
       { find: 'next/headers', replacement: here('./src/shims/next-headers.ts') },
+      { find: /^(\.\.\/)+platform-auth$/, replacement: here('./src/shims/platform-auth.ts') },
       { find: 'next/navigation', replacement: here('./src/shims/next-navigation.ts') },
       { find: /^@\//, replacement: here('../') },
     ],

@@ -3,6 +3,7 @@ import * as portal from '../../app/api/portal/route';
 import * as workforce from '../../app/api/workforce/route';
 import * as hours from '../../app/api/hours/route';
 import * as leave from '../../app/api/leave/route';
+import { TEAM, certs } from './microsoft';
 
 type Handler = { GET?: (r: Request) => Promise<Response>; POST?: (r: Request) => Promise<Response> };
 const routes: Record<string, Handler> = {
@@ -36,6 +37,7 @@ export function installServer() {
   window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     const raw = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url;
     const url = new URL(raw, ORIGIN);
+    if (url.host === TEAM && url.pathname === '/cdn-cgi/access/certs') return Response.json(certs());
     const route = url.pathname.startsWith('/api/') ? routes[url.pathname] : undefined;
     if (!route) return realFetch(input, init);
     const method = (init?.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
