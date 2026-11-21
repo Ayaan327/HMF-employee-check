@@ -45,3 +45,4 @@ yarn-error.log*
 .DS_Store
 /preview/node_modules/
 /preview/dist/
+/HMF-employee-check-backup.zip
