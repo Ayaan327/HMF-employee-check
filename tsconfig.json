@@ -49,6 +49,7 @@
     ".sites-runtime",
     "outputs",
     "work",
-    "codex-import"
+    "codex-import",
+    "preview"
   ]
 }

@@ -829,7 +829,11 @@ function Employee({ me, today, historyOnly }: { me: User; today: string; history
             <div className="employee-grid">
               <section className="checkin-panel">
                 <div className="checkin-heading">
-                  <h2>Update attendance or report an absence</h2>
+                  <h2>Today’s status</h2>
+                  <p className="muted">
+                    Checking in sets this for you. Use it to change where you’re working or to
+                    report an absence.
+                  </p>
                 </div>
                 {existing && (
                   <div className="saved-indicator">
@@ -947,11 +951,11 @@ function Employee({ me, today, historyOnly }: { me: User; today: string; history
               <caption className="sr-only">My attendance history</caption>
               <thead>
                 <tr>
-                  <th scope="col">DATE</th>
-                  <th scope="col">STATUS</th>
-                  <th scope="col">LAST UPDATED</th>
-                  <th scope="col">REASON</th>
-                  <th scope="col">SOURCE</th>
+                  <th scope="col">Date</th>
+                  <th scope="col">Status</th>
+                  <th scope="col">Last updated</th>
+                  <th scope="col">Note</th>
+                  <th scope="col">Source</th>
                 </tr>
               </thead>
               <tbody>

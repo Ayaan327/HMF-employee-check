@@ -1,0 +1,12 @@
+{
+  "name": "hmf-attendance-browser-preview",
+  "private": true,
+  "type": "module",
+  "description": "Builds a self-contained browser preview of the HMF app (real UI + real API route code, SQLite in the browser). Never deployed; demo data only.",
+  "scripts": {
+    "build": "node ../node_modules/vite/bin/vite.js build --config vite.config.ts && node build-artifact.mjs"
+  },
+  "dependencies": {
+    "sql.js": "1.13.0"
+  }
+}

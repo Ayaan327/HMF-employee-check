@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
     "outputs/**",
     "work/**",
     "codex-import/**",
+    "preview/**",
   ]),
   {
     files: ["components/ui/**/*.{ts,tsx}", "hooks/use-mobile.ts"],

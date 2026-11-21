@@ -29,6 +29,27 @@ const stamp = (v: string | null, zone: string) =>
         minute: '2-digit',
       })
     : '—';
+// Table formatting: short weekday dates, times only (full stamp if the time falls on another day).
+const dayLabel = (d: string) =>
+  new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', {
+    timeZone: 'UTC',
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+const clock = (v: string | null | undefined, zone: string, date: string) => {
+  if (!v) return '—';
+  const local = new Date(v).toLocaleDateString('en-CA', { timeZone: zone });
+  return local === date
+    ? new Date(v).toLocaleTimeString('en-GB', {
+        timeZone: zone,
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+    : stamp(v, zone);
+};
+const hoursCell = (v: number | null | undefined) =>
+  v === null || v === undefined ? '—' : `${Number((v / 60).toFixed(2))} h`;
 const Feedback = ({ error, success }: { error: string; success?: string }) => (
   <>
     {error && (
@@ -378,8 +399,8 @@ export function HoursView({ teamView = false }: { teamView?: boolean }) {
         {incomplete > 0 && ` · ${incomplete} incomplete time records`}
       </p>
       <p className="muted">
-        Recorded totals include completed records only. Times are local to each record’s office. No
-        hours are sent to payroll.
+        Totals include completed records only. Times are local to each record’s office. Hours are
+        not sent to payroll.
       </p>
       <div
         className="table-scroll"
@@ -394,8 +415,8 @@ export function HoursView({ teamView = false }: { teamView?: boolean }) {
             <tr>
               {teamView && <th scope="col">Employee</th>}
               <th scope="col">Date</th>
-              <th scope="col">Check-in / out</th>
-              <th scope="col">Recorded / scheduled</th>
+              <th scope="col">In – out</th>
+              <th scope="col">Recorded</th>
               <th scope="col">Difference</th>
               <th scope="col">Review</th>
               <th scope="col">
@@ -407,21 +428,27 @@ export function HoursView({ teamView = false }: { teamView?: boolean }) {
             {filtered.slice((page - 1) * 14, page * 14).map((r) => (
               <tr key={r.employeeId + r.date}>
                 {teamView && <td>{r.name}</td>}
-                <td>{r.date}</td>
-                <td>
-                  {stamp(r.record?.check_in, r.timezone)}
-                  <small className="sample-label">
-                    {stamp(r.record?.check_out, r.timezone)} · {r.timezone}
-                  </small>
+                <td className="time-cell">{dayLabel(r.date)}</td>
+                <td className="time-cell">
+                  {r.record
+                    ? clock(r.record.check_in, r.timezone, r.date) +
+                      ' – ' +
+                      clock(r.record.check_out, r.timezone, r.date)
+                    : '—'}
+                  {teamView && r.record && <small className="sample-label">{r.timezone}</small>}
                 </td>
-                <td>
-                  {amount(r.recordedMinutes)}
-                  <small className="sample-label">Scheduled {amount(r.scheduledMinutes)}</small>
+                <td className="time-cell">
+                  {hoursCell(r.recordedMinutes)}
+                  {r.scheduledMinutes !== null && r.scheduledMinutes !== undefined && (
+                    <small className="sample-label">
+                      of {hoursCell(r.scheduledMinutes)} scheduled
+                    </small>
+                  )}
                 </td>
-                <td>
+                <td className="time-cell">
                   {r.differenceMinutes === null
                     ? '—'
-                    : (r.differenceMinutes > 0 ? '+' : '') + amount(r.differenceMinutes)}
+                    : (r.differenceMinutes > 0 ? '+' : '') + hoursCell(r.differenceMinutes)}
                 </td>
                 <td>
                   {[

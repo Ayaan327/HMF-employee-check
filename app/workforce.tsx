@@ -1321,8 +1321,8 @@ export function WorkforceSettings() {
 
 export function PrivacyNotice() {
   return (
-    <div className="privacy-footnote">
-      <strong>Employee privacy</strong>
+    <details className="privacy-footnote">
+      <summary>Employee privacy</summary>
       <p>
         Employees see their own records. Managers see assigned reports, and HR access is limited to
         authorized offices.
@@ -1335,6 +1335,6 @@ export function PrivacyNotice() {
         Changes are logged and retained when accounts are deactivated. Contact your manager or HR
         for corrections.
       </p>
-    </div>
+    </details>
   );
 }

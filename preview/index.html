@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>HMF Attendance</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%23102b45'/%3E%3Ctext x='16' y='22' font-family='Georgia' font-size='15' font-weight='700' text-anchor='middle' fill='%23fff'%3EH%3C/text%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <div class="preview-bar" role="note">
+      <span><strong>Preview</strong> · runs entirely in your browser with fictional data</span>
+      <span>Admin <code>admin@hmf.example</code> · Employee <code>employee.uk@hmf.example</code> · Password <code>HmfDemo!2026</code></span>
+      <span id="preview-reset-area">
+        <button type="button" id="preview-reset">Reset demo data</button>
+        <span id="preview-reset-confirm" hidden>
+          Clear your changes and start again?
+          <button type="button" id="preview-reset-yes">Reset</button>
+          <button type="button" id="preview-reset-no">Cancel</button>
+        </span>
+      </span>
+    </div>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

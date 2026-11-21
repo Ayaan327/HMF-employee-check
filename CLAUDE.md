@@ -22,6 +22,11 @@ Demo logins (fictional): admin@hmf.example, employee.uk@hmf.example, employee.pk
 `npm run test:unit` needs no server. See `TESTING.md`. In this cloud container, run browser tests with
 `npx playwright test -c <scratchpad>/pw-local.config.ts`, a wrapper pointing at `/opt/pw-browsers/chromium-1243/chrome-linux64/chrome`.
 
+## Browser preview
+`preview/` builds the real UI + API routes to run fully in a browser (sql.js, demo data only) for claude.ai:
+`cd preview && npm install && npm run build` → `preview/dist/artifact.html` + `preview/dist/assets/*`.
+Shims live in `preview/src/` (D1 adapter, cookie/origin handling). Not deployable; never put real data in it.
+
 ## Docs
 - `README.md`, `PHASE-1/2/3.md`, `REVIEW-IMPROVEMENTS.md`, `TESTING.md`: feature and test docs from the handoff (plans are not proof of completion)
 - `docs/HOSTING-M365-DOMAIN-ASSESSMENT.md`: path to HMF-owned Cloudflare, Microsoft 365 sign-in, company domain

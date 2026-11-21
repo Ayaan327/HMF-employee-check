@@ -5,6 +5,9 @@
 - [x] Full test suite passes locally (tsc, prettier, 22 unit, migrations, 4 integration suites, 6 browser/axe)
 - [x] Hosting / Microsoft 365 / domain assessment: `docs/HOSTING-M365-DOMAIN-ASSESSMENT.md`
 
+- [x] UI redesign (single stylesheet, clearer Today/Hours/Settings/People) with all tests passing
+- [x] Browser preview build in `preview/` (`cd preview && npm install && npm run build`)
+
 ## Blocked on HMF decisions (see assessment, section 5)
 - [ ] HMF Cloudflare account owner and admins
 - [ ] Entra tenant ID and admin consent; tenant-wide or group access
@@ -20,6 +23,7 @@
 - [ ] Put this folder in an HMF GitHub repo so CI runs
 
 ## Cleanup
+- [ ] Preview limitation: CSV downloads are blocked by the claude.ai viewer (work in the real app)
 - [ ] Lint: 56 errors (43 `no-explicit-any`, 13 `react-hooks/set-state-in-effect`) in app code; not in CI
 - [ ] Remove unused Sites connector-preview scaffolding after the auth swap
 - [ ] Rename package from `site-creator-vinext-starter`
