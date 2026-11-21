@@ -1,0 +1,6 @@
+﻿id,name,email,office,department,jobTitle,managerId,employmentType,startDate,weeklyHours,timezone
+PRACTICE-001,Amina Rahman,amina.rahman.practice@hmf.example,UK,Management,Operations Manager,,full-time,2026-01-05,37.5,Europe/London
+PRACTICE-002,Daniel Hughes,daniel.hughes.practice@hmf.example,UK,Electrical Engineering,Electrical Engineer,,full-time,2026-01-05,37.5,Europe/London
+PRACTICE-003,Sophie Martin,sophie.martin.practice@hmf.example,UK,Project Management,Project Coordinator,,part-time,2026-01-05,22.5,Europe/London
+PRACTICE-004,Bilal Khan,bilal.khan.practice@hmf.example,PK,Management,Office Manager,,full-time,2026-01-05,40,Asia/Karachi
+PRACTICE-005,Sara Ahmed,sara.ahmed.practice@hmf.example,PK,Civil Engineering,Civil Engineer,,full-time,2026-01-05,40,Asia/Karachi

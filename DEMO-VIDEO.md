@@ -1,0 +1,16 @@
+# HMF Attendance demo recording plan
+
+Target runtime is five minutes. Record in the local preview with fictional accounts. Set up a fictional schedule, allowance, office holiday, pending leave request and hours correction before recording. Keep passwords, browser autofill and unrelated desktop windows out of the recording.
+
+| Time | Screen and action | Narration |
+| --- | --- | --- |
+| 0:00–0:20 | Open the portal and enter the employee workspace. | “HMF Attendance brings daily attendance, working hours, schedules and leave together. We’ll start with what an employee sees, then switch to the management workspace.” |
+| 0:20–1:05 | On Today, choose a location and check in. Show the resulting status, then cut to checkout. Point out the separate attendance update and absence form. | “Choose your location and check in. When you finish, check out here. If a check-in is left open, Today will remind you. Use the attendance form when you need to report an absence or update your status.” |
+| 1:05–1:45 | Open Hours and show recorded versus scheduled time. Open a correction and show the date, time and explanation fields. Visit Schedule, History and My profile. | “Hours shows the working time recorded for each date. If a time is missing or incorrect, request a correction for that record. Schedule shows your assigned work pattern. History and My profile show your attendance and employment information.” |
+| 1:45–2:30 | Open Leave. Show the balance, submit a request and point to its pending status. Scroll to office holidays. | “Leave shows the configured allowance, carry-forward, approved leave and balance. Choose the dates you need and submit a request. You can cancel it while it’s pending. The office holiday calendar is below your requests.” |
+| 2:30–3:15 | Switch to the demo admin. Open Attendance and show date and office filters, then open a fictional employee’s details. Visit People and show profile, schedule and access settings. | “Managers and admins see the employees in their scope. Filter attendance by date or office and open a record to review its details. People is where authorized staff maintain employee profiles and schedules.” |
+| 3:15–4:05 | Open team Hours and show the correction queue. Open Leave and demonstrate a decision on a fictional request with a short note. | “Review working-time exceptions and correction requests from Hours. In Leave, authorized reviewers can approve or decline a request and record their reason.” |
+| 4:05–4:45 | Open Reports, choose dates and download attendance and hours CSVs. Show the Reports screen and one fictional export header. | “Reports lets you download attendance submissions and team hours for a selected date range. The exports use the same team scope as the portal. Private attendance notes are omitted from the attendance report.” |
+| 4:45–5:00 | Show policy settings and return to the workspace. | “Office and working-hours settings follow HMF’s agreed rules. This walkthrough uses fictional records in the HMF preview.” |
+
+Use hard cuts between roles and compress the interval between check-in and checkout. Record voiceover after the screen capture so narration can match the actual screens. Verify both reports download from the browser before filming that segment.
