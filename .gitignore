@@ -49,3 +49,9 @@ yarn-error.log*
 
 # Database backups contain personal data: keep them out of git
 /backups/
+
+# Demo setup files with real tester emails or one-off SQL
+/deploy/my-testers.csv
+/first-admin.sql
+/demo-testers.sql
+/demo-backup*.sql

@@ -9,6 +9,12 @@
 - [x] Demo hints (demo accounts, "Private demo") only shown when HMF_DEMO_MODE is on
 - [x] Browser preview build in `preview/` (`cd preview && npm install && npm run build`)
 
+## Pitch demo (own Cloudflare account)
+- [x] Email-code sign-in wording (`HMF_SIGNIN_NAME`), demo deploy settings (`deploy/demo.json`)
+- [x] Tester setup script (`scripts/demo-testers-sql.mjs`) and guide (`docs/DEMO-SETUP.md`)
+- [ ] Ayaan: run docs/DEMO-SETUP.md with ~10 testers for several days before the pitch
+- [ ] Usage report for the pitch; one-page summary / slides
+
 ## Blocked on HMF decisions (see assessment, section 5)
 - [ ] HMF Cloudflare account owner and admins
 - [ ] Entra tenant ID and admin consent; tenant-wide or group access

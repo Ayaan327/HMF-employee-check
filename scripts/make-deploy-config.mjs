@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const env = process.argv[2];
-if (!['staging', 'production'].includes(env)) throw new Error('Usage: make-deploy-config.mjs staging|production');
+if (!['demo', 'staging', 'production'].includes(env)) throw new Error('Usage: make-deploy-config.mjs demo|staging|production');
 const built = 'dist/server/wrangler.json';
 if (!existsSync(built)) throw new Error('Run npm run build first.');
 const inputPath = process.env.HMF_DEPLOY_INPUT || `deploy/${env}.json`;
@@ -22,6 +22,7 @@ need('d1DatabaseId', /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{
 need('accessTeamDomain', /^[a-z0-9-]+\.cloudflareaccess\.com$/, '<team>.cloudflareaccess.com');
 need('accessAud', /^[a-f0-9]{64}$/, '64-character Access application AUD tag');
 if (!['all', 'system-admins'].includes(input.passwordLogin)) problems.push('passwordLogin: "all" or "system-admins"');
+if (input.signInName !== undefined && !/^[\w .-]{1,40}$/.test(String(input.signInName))) problems.push('signInName: up to 40 letters, e.g. "Microsoft 365"');
 if (input.customDomain !== null && !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(String(input.customDomain))) problems.push('customDomain: hostname or null');
 if (input.d1DatabaseId === '00000000-0000-4000-8000-000000000000') problems.push('d1DatabaseId: still the local placeholder');
 if (problems.length) {
@@ -33,7 +34,7 @@ const config = JSON.parse(readFileSync(built, 'utf8'));
 config.name = input.workerName;
 config.topLevelName = input.workerName;
 config.account_id = input.accountId;
-config.workers_dev = env === 'staging';
+config.workers_dev = env !== 'production';
 config.d1_databases = [
   { binding: 'DB', database_name: input.d1DatabaseName, database_id: input.d1DatabaseId, migrations_dir: '../../drizzle' },
 ];
@@ -43,11 +44,12 @@ config.vars = {
   ACCESS_TEAM_DOMAIN: input.accessTeamDomain,
   ACCESS_AUD: input.accessAud,
   HMF_PASSWORD_LOGIN: input.passwordLogin,
+  HMF_SIGNIN_NAME: input.signInName || 'Microsoft 365',
 };
 config.routes = input.customDomain ? [{ pattern: input.customDomain, custom_domain: true }] : [];
 delete config.services;
 const out = `dist/server/wrangler.${env}.json`;
 writeFileSync(out, JSON.stringify(config, null, 2));
-console.log(`Wrote ${out}. Next (needs Cloudflare login, run by HMF IT):`);
+console.log(`Wrote ${out}. Next (run while logged in to the right Cloudflare account with npx wrangler login):`);
 console.log(`  npx wrangler d1 migrations apply ${input.d1DatabaseName} --remote --config ${out}`);
 console.log(`  npx wrangler deploy --config ${out}`);

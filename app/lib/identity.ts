@@ -26,6 +26,8 @@ export type IdentityConfig = {
   teamDomain?: string;
   audience?: string;
   passwordLogin: 'all' | 'system-admins';
+  // What people see for the company sign-in, e.g. "Microsoft 365" or "email code" (demo).
+  signInName: string;
   problem?: string;
 };
 
@@ -34,6 +36,7 @@ type IdentityEnv = {
   ACCESS_TEAM_DOMAIN?: string;
   ACCESS_AUD?: string;
   HMF_PASSWORD_LOGIN?: string;
+  HMF_SIGNIN_NAME?: string;
 };
 
 const TEAM_DOMAIN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.cloudflareaccess\.com$/;
@@ -41,8 +44,9 @@ const AUDIENCE = /^[a-f0-9]{64}$/;
 
 export function identityConfig(env: IdentityEnv, development: boolean): IdentityConfig {
   const passwordLogin = env.HMF_PASSWORD_LOGIN === 'system-admins' ? 'system-admins' : 'all';
+  const signInName = (env.HMF_SIGNIN_NAME || '').trim().slice(0, 40) || 'Microsoft 365';
   const mode = env.HMF_AUTH_MODE || (development ? 'sites' : '');
-  if (mode === 'sites') return { mode: 'sites', passwordLogin };
+  if (mode === 'sites') return { mode: 'sites', passwordLogin, signInName };
   if (mode === 'cloudflare-access') {
     const teamDomain = (env.ACCESS_TEAM_DOMAIN || '').trim().toLowerCase();
     const audience = (env.ACCESS_AUD || '').trim().toLowerCase();
@@ -50,13 +54,15 @@ export function identityConfig(env: IdentityEnv, development: boolean): Identity
       return {
         mode: 'unconfigured',
         passwordLogin,
+        signInName,
         problem: 'ACCESS_TEAM_DOMAIN or ACCESS_AUD is missing or invalid.',
       };
-    return { mode, teamDomain, audience, passwordLogin };
+    return { mode, teamDomain, audience, passwordLogin, signInName };
   }
   return {
     mode: 'unconfigured',
     passwordLogin,
+    signInName,
     problem: mode ? `Unknown HMF_AUTH_MODE "${mode}".` : 'HMF_AUTH_MODE is not set.',
   };
 }

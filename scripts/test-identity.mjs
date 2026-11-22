@@ -35,6 +35,8 @@ test('mode selection fails closed in production', () => {
   assert.equal(config.mode, 'cloudflare-access');
   assert.equal(config.passwordLogin, 'all');
   assert.equal(identityConfig({ HMF_PASSWORD_LOGIN: 'system-admins' }, true).passwordLogin, 'system-admins');
+  assert.equal(config.signInName, 'Microsoft 365');
+  assert.equal(identityConfig({ HMF_SIGNIN_NAME: ' email code ' }, true).signInName, 'email code');
 });
 
 test('a valid Cloudflare Access token yields the verified person', async () => {

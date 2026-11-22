@@ -419,7 +419,7 @@ export async function POST(req: Request) {
         owner.provider !== 'cloudflare-access' ||
           authConfig().passwordLogin === 'all' ||
           person.roles.includes('system_admin'),
-        'Sign in with your Microsoft 365 account. Password sign-in is reserved for system administrators.',
+        `Sign in with ${authConfig().signInName}. Password sign-in is reserved for system administrators.`,
         403,
       );
       requireValue(
@@ -466,7 +466,7 @@ export async function POST(req: Request) {
       // open the employee record that belongs to that verified identity. No password involved.
       requireValue(
         owner.provider === 'cloudflare-access',
-        'Microsoft 365 sign-in is not enabled for this site.',
+        'Company sign-in is not enabled for this site.',
         400,
       );
       await seed();
@@ -488,7 +488,7 @@ export async function POST(req: Request) {
           person.active === 1 &&
           person.profile.employmentStatus === 'active' &&
           (!person.profile.endDate || person.profile.endDate >= dayInZone(person.timezone)),
-        `Your Microsoft 365 account (${owner.email}) is not linked to an active HMF employee. Ask HR to check the email address on your employee record.`,
+        `${owner.email} is not linked to an active HMF employee. Ask HR to check the email address on your employee record.`,
         403,
       );
       const token = crypto.randomUUID() + crypto.randomUUID();
@@ -509,8 +509,8 @@ export async function POST(req: Request) {
                 relinked ? { employeeId: link.employee_id } : null,
                 { provider: owner.provider, email: owner.email },
                 relinked
-                  ? 'Microsoft 365 sign-in moved to this employee record (matching email)'
-                  : 'First Microsoft 365 sign-in linked to this employee record',
+                  ? 'Company sign-in moved to this employee record (matching email)'
+                  : 'First company sign-in linked to this employee record',
                 'sso',
               ),
             ]

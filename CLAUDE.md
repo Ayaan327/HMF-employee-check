@@ -40,6 +40,7 @@ Shims live in `preview/src/` (D1 adapter, cookie/origin handling). Not deployabl
   (HMF hosting: verified Access JWT + Microsoft 365 SSO via the `sso` action) or `sites` (legacy platform / local dev).
   Unset in production = every request refused. Never trust identity headers outside `sites` mode. Never remove authentication.
 - Backups: `docs/BACKUPS.md`, `npm run db:backup -- local|staging|production`, `npm run db:restore-check -- <file>`. Backups hold personal data: never commit them.
+- Pitch demo (own account, email-code sign-in): `docs/DEMO-SETUP.md`, `deploy/demo.json`, `scripts/demo-testers-sql.mjs`.
 - HMF deployment: `deploy/README.md`, `deploy/*.json`, `scripts/make-deploy-config.mjs`, `scripts/first-admin-sql.mjs`.
 - Never deploy, migrate live data or change DNS without Ayaan's explicit go-ahead.
 - No real employee data, secrets, `.dev.vars` or `.env` files in the repo. Do not invent statutory leave/working-time policy.

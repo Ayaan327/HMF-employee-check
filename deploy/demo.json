@@ -1,0 +1,12 @@
+{
+  "_comment": "Ayaan's own Cloudflare demo (not HMF's account). Fill every REPLACE_ value; see docs/DEMO-SETUP.md. Identifiers only, no secrets.",
+  "workerName": "hmf-attendance-demo",
+  "accountId": "REPLACE_WITH_CLOUDFLARE_ACCOUNT_ID",
+  "d1DatabaseName": "hmf-attendance-demo",
+  "d1DatabaseId": "REPLACE_WITH_D1_DATABASE_ID",
+  "accessTeamDomain": "REPLACE_TEAM.cloudflareaccess.com",
+  "accessAud": "REPLACE_WITH_ACCESS_APPLICATION_AUD_TAG",
+  "passwordLogin": "system-admins",
+  "signInName": "email code",
+  "customDomain": null
+}

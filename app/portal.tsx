@@ -89,7 +89,13 @@ type ApiData = {
   auth?: AuthInfo;
   identityEmail?: string;
 };
-type AuthInfo = { mode: string; sso: boolean; signOutUrl: string | null; demo?: boolean };
+type AuthInfo = {
+  mode: string;
+  sso: boolean;
+  signOutUrl: string | null;
+  demo?: boolean;
+  signInName?: string;
+};
 // Set from the server's answers; decides where an expired session sends the browser.
 let authMode = 'sites';
 const officeName = (o: string) => (o === 'PK' ? 'Pakistan' : o === 'UK' ? 'United Kingdom' : o);
@@ -226,7 +232,15 @@ export default function Portal() {
       <Login
         onLogin={signedIn}
         initialError={fatal}
-        sso={auth?.sso ? { email: identityEmail, retry: microsoftSignIn } : null}
+        sso={
+          auth?.sso
+            ? {
+                email: identityEmail,
+                name: auth.signInName || 'Microsoft 365',
+                retry: microsoftSignIn,
+              }
+            : null
+        }
         demo={Boolean(auth?.demo)}
       />
     );
@@ -260,7 +274,7 @@ function Login({
 }: {
   onLogin: (d: any) => void;
   initialError: string;
-  sso: { email: string; retry: () => Promise<void> } | null;
+  sso: { email: string; name: string; retry: () => Promise<void> } | null;
   demo: boolean;
 }) {
   const [step, setStep] = useState(1),
@@ -297,9 +311,7 @@ function Login({
         <section className="simple-login-form">
           <h1>Attendance</h1>
           <p className="muted">
-            {sso.email
-              ? `Signed in to Microsoft 365 as ${sso.email}.`
-              : 'Sign in with your HMF Microsoft 365 account.'}
+            {sso.email ? `Signed in as ${sso.email}.` : `Sign in with ${sso.name}.`}
           </p>
           {error && (
             <div className="error" role="alert">
@@ -316,11 +328,11 @@ function Login({
               setBusy(false);
             }}
           >
-            {busy ? 'Signing in…' : 'Continue with Microsoft 365'}
+            {busy ? 'Signing in…' : `Continue with ${sso.name}`}
             <ArrowRight size={18} />
           </button>
           <p className="secure-note">
-            Not you? <a href="/cdn-cgi/access/logout">Use a different Microsoft account</a>
+            Not you? <a href="/cdn-cgi/access/logout">Use a different account</a>
           </p>
         </section>
       )}

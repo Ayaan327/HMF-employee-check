@@ -1,0 +1,10 @@
+name,email,office,role,manager,department,job title
+Sarah Ahmed,sarah.example@gmail.com,UK,hr,,Human Resources,HR coordinator
+James Patel,james.example@gmail.com,UK,manager,,Electrical Engineering,Engineering manager
+Emma Wilson,emma.example@gmail.com,UK,employee,james.example@gmail.com,Electrical Engineering,Electrical engineer
+Tom Clarke,tom.example@gmail.com,UK,employee,james.example@gmail.com,Electrical Engineering,Graduate engineer
+Hira Khan,hira.example@gmail.com,PK,manager,,Civil Engineering,Site manager
+Usman Ali,usman.example@gmail.com,PK,employee,hira.example@gmail.com,Civil Engineering,Civil engineer
+Ayesha Raza,ayesha.example@gmail.com,PK,employee,hira.example@gmail.com,Civil Engineering,CAD technician
+Daniel Hughes,daniel.example@gmail.com,UK,employee,james.example@gmail.com,Project Management,Project coordinator
+Zara Hussain,zara.example@gmail.com,PK,employee,hira.example@gmail.com,Grid Connections,Design engineer

@@ -41,6 +41,7 @@ export function People() {
   const { config, reload } = useWorkforce(),
     [people, setPeople] = useState<DirectoryPerson[]>([]),
     [microsoftSignIn, setMicrosoftSignIn] = useState(false),
+    [signInName, setSignInName] = useState('Microsoft 365'),
     [search, setSearch] = useState(''),
     [office, setOffice] = useState(''),
     [status, setStatus] = useState(''),
@@ -60,6 +61,7 @@ export function People() {
         if (live) {
           setPeople(d.people);
           setMicrosoftSignIn(Boolean(d.microsoftSignIn));
+          if (d.signInName) setSignInName(d.signInName);
           setError('');
         }
       })
@@ -211,8 +213,8 @@ export function People() {
                     {microsoftSignIn && (
                       <small className="sample-label">
                         {p.microsoft
-                          ? 'Microsoft sign-in · last ' + timestamp(p.microsoft.lastSeenAt)
-                          : 'Not signed in with Microsoft yet'}
+                          ? `Signed in with ${signInName} · last ${timestamp(p.microsoft.lastSeenAt)}`
+                          : `Not signed in with ${signInName} yet`}
                       </small>
                     )}
                   </td>
@@ -233,7 +235,7 @@ export function People() {
           <span>
             {filtered.length} employees
             {microsoftSignIn &&
-              ` · ${filtered.filter((p) => p.microsoft).length} have signed in with Microsoft`}
+              ` · ${filtered.filter((p) => p.microsoft).length} have signed in with ${signInName}`}
           </span>
           <div>
             <button
@@ -378,7 +380,7 @@ export function ProfileView({ id, close }: { id?: string; close?: () => void }) 
           <Value label="Access roles" value={p.roles.map((r) => roleLabel[r]).join(', ')} />
           {data.microsoft !== undefined && (
             <Value
-              label="Microsoft 365 sign-in"
+              label={`${data.signInName || 'Microsoft 365'} sign-in`}
               value={
                 data.microsoft
                   ? `${data.microsoft.email} · last used ${timestamp(data.microsoft.lastSeenAt)}`

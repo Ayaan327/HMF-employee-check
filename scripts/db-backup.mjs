@@ -9,8 +9,8 @@ import path from 'node:path';
 import { inspect, loadExport, sha256, wrangler } from './lib-db-backup.mjs';
 
 const [target, ...rest] = process.argv.slice(2);
-if (!['local', 'staging', 'production'].includes(target)) {
-  console.error('Usage: npm run db:backup -- local|staging|production [--out <folder>]');
+if (!['local', 'demo', 'staging', 'production'].includes(target)) {
+  console.error('Usage: npm run db:backup -- local|demo|staging|production [--out <folder>]');
   process.exit(1);
 }
 const outIndex = rest.indexOf('--out');

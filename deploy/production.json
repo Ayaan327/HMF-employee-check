@@ -7,5 +7,6 @@
   "accessTeamDomain": "REPLACE_TEAM.cloudflareaccess.com",
   "accessAud": "REPLACE_WITH_ACCESS_APPLICATION_AUD_TAG",
   "passwordLogin": "system-admins",
+  "signInName": "Microsoft 365",
   "customDomain": "attendance.hmfconsultants.co.uk"
 }

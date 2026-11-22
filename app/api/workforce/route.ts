@@ -162,6 +162,7 @@ export async function GET(req: Request) {
       return json({
         people: links ? rows.map((p) => ({ ...p, microsoft: links.get(p.id) ?? null })) : rows,
         microsoftSignIn: Boolean(links),
+        signInName: authConfig().signInName,
       });
     }
     if (action === 'template') {
@@ -178,6 +179,7 @@ export async function GET(req: Request) {
       return json({
         person: safePerson(me, target),
         microsoft: links ? (links.get(target.id) ?? null) : undefined,
+        signInName: authConfig().signInName,
         canEdit: employmentAccess(me, target),
         canSchedule: team(me) && scope(me, target) && (target.id !== me.id || manages(me)),
         today: dayInZone(target.timezone),
