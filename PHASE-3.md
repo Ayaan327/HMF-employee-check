@@ -1,6 +1,6 @@
 # Phase 3 — leave management and interface refurbishment
 
-Phase 3 is in development. The first slice adds date-range requests, pending cancellation and scoped approval or decline in the Leave tab. Apply the additive local migration before previewing this workflow. The sections below describe the full release scope.
+Phase 3 is in development. The first slice adds date-range requests, pending cancellation and scoped approval or decline in the Leave tab. Approved leave can now also be cancelled (employee before it starts; manager or HR with a reason), restoring the balance and attendance. Apply the additive local migration before previewing this workflow. The sections below describe the full release scope.
 
 The cleaner employee home screen is the visual benchmark for the interface refurbishment. Each page should feel calm, direct and easy to scan.
 

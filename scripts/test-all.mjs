@@ -18,6 +18,6 @@ try {
   console.error('Start the local test preview with npm run dev before running integration/browser tests. See TESTING.md.');
   process.exit(1);
 }
-for(const file of ['test-portal.mjs','test-phase-one.mjs','test-phase-two.mjs','test-phase-three.mjs']) run(process.execPath,['scripts/'+file]);
+for(const file of ['test-portal.mjs','test-phase-one.mjs','test-phase-two.mjs','test-phase-three.mjs','test-leave-cancel.mjs']) run(process.execPath,['scripts/'+file]);
 run(process.execPath,['node_modules/@playwright/test/cli.js','test']);
 console.log('All unit, migration, integration and browser checks passed.');

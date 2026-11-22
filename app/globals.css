@@ -1431,6 +1431,22 @@ dialog::backdrop {
 .leave-list > *:last-child {
   border-bottom: 0;
 }
+.leave-list li > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.leave-list li > div:first-child > p {
+  margin: 0;
+}
+.leave-list li > div:first-child > p:not(.badge) {
+  flex-basis: 100%;
+  color: var(--muted);
+}
+.leave-list li > button {
+  margin-top: var(--s2);
+}
 
 /* ---------- Legacy office overview (kept for reference screens) ---------- */
 .office-cards,

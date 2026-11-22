@@ -227,6 +227,7 @@ export async function GET(req: Request) {
       office,
       offices: config.offices.filter((o) => system(me) || o.code === me.office),
       canEditPolicy: system(me),
+      today,
     });
   } catch (error) {
     return failure(error);
@@ -410,6 +411,78 @@ export async function POST(req: Request) {
       .first<LeaveRequest>();
     const employee = people.find((person) => person.id === row?.employee_id);
     requireValue(row && employee, 'Request not found.', 404);
+    if (body.action === 'cancelApproved') {
+      // Cancelling leave that was already approved. The employee may do this before the leave
+      // starts; their manager or HR may do it at any time, with a reason. The balance is freed by
+      // the status change; attendance entries that approval created (and nobody changed since)
+      // are removed; everything is audited.
+      const today = dayInZone(employee.timezone);
+      const self = me.id === employee.id,
+        reviewer = canReview(me, employee);
+      requireValue(self || reviewer, 'Request not found.', 404);
+      requireValue(row.status === 'approved', 'Only approved leave can be cancelled here.', 409);
+      requireValue(
+        reviewer || row.start_date > today,
+        'This leave has already started. Ask your manager or HR to cancel it.',
+        403,
+      );
+      const reason = reviewer
+        ? textValue(body.note, 500, true)
+        : textValue(body.note || '', 500) || 'Cancelled by employee before the leave started';
+      const charged = row.snapshot
+        ? (JSON.parse(row.snapshot) as LeaveCharge).days.map((d) => d.date)
+        : leaveDates(row.start_date, row.end_date);
+      const dates = JSON.stringify(charged);
+      const leaveEntries =
+        "SELECT date FROM attendance WHERE employee_id=? AND date IN (SELECT value FROM json_each(?)) AND source='leave' AND status='annual_leave'";
+      const removed = (
+        await database
+          .prepare(leaveEntries.replace('SELECT date', 'SELECT *'))
+          .bind(employee.id, dates)
+          .all()
+      ).results;
+      const revision = await balanceRevision(employee.id);
+      await database.batch([
+        ...balanceWrites(employee.id, revision),
+        database
+          .prepare(
+            "INSERT INTO write_guards(id,valid) VALUES ('guard',CASE WHEN EXISTS(SELECT 1 FROM leave_requests WHERE id=? AND status='approved') THEN 1 ELSE 0 END) ON CONFLICT(id) DO UPDATE SET valid=excluded.valid",
+          )
+          .bind(id),
+        database
+          .prepare(
+            `DELETE FROM attendance_details WHERE employee_id=? AND date IN (${leaveEntries})`,
+          )
+          .bind(employee.id, employee.id, dates),
+        database
+          .prepare(
+            "DELETE FROM attendance WHERE employee_id=? AND date IN (SELECT value FROM json_each(?)) AND source='leave' AND status='annual_leave'",
+          )
+          .bind(employee.id, dates),
+        database
+          .prepare(
+            "UPDATE leave_requests SET status='cancelled',decided_by=?,decided_at=?,decision_note=? WHERE id=?",
+          )
+          .bind(me.id, now(), reason, id),
+        audit(
+          me.id,
+          employee.id,
+          'attendance.leave_cancelled',
+          removed,
+          { requestId: id, dates: charged },
+          'Annual leave entries removed after approved leave was cancelled',
+        ),
+        audit(
+          me.id,
+          employee.id,
+          'leave.cancelled_after_approval',
+          { ...row, note: undefined, snapshot: undefined },
+          { ...row, note: undefined, snapshot: undefined, status: 'cancelled' },
+          reason,
+        ),
+      ]);
+      return json({ ok: true });
+    }
     const status = body.action;
     const cancelling = status === 'cancelled';
     requireValue(

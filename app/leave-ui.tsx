@@ -18,6 +18,7 @@ type LeaveOverview = {
   office: string;
   offices: { code: string; name: string }[];
   canEditPolicy: boolean;
+  today: string;
   policy: {
     start: string;
     end: string;
@@ -33,6 +34,13 @@ type LeaveOverview = {
     available: number | null;
     unit: string;
   };
+};
+
+const statusLabel: Record<string, string> = {
+  pending: 'Pending',
+  approved: 'Approved',
+  declined: 'Declined',
+  cancelled: 'Cancelled',
 };
 
 async function leaveApi(body?: object, office = '') {
@@ -62,6 +70,7 @@ export function LeaveView() {
   const [revision, setRevision] = useState(0);
   const [editing, setEditing] = useState(false);
   const [review, setReview] = useState<string | null>(null);
+  const [cancelling, setCancelling] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -90,6 +99,7 @@ export function LeaveView() {
       setEditing(false);
       setEditingPolicy(false);
       setReview(null);
+      setCancelling(null);
       setRevision((value) => value + 1);
     } catch (error) {
       setError((error as Error).message);
@@ -127,7 +137,7 @@ export function LeaveView() {
               <p
                 className={`badge leave-status ${row.status === 'approved' ? 'present' : row.status === 'declined' ? 'absent' : row.status === 'pending' ? 'pending' : ''}`}
               >
-                {row.status}
+                {statusLabel[row.status] || row.status}
               </p>
               {row.decision_note && row.status !== 'cancelled' && <p>{row.decision_note}</p>}
             </div>
@@ -141,6 +151,45 @@ export function LeaveView() {
               >
                 Cancel request
               </button>
+            )}
+            {row.status === 'approved' &&
+              cancelling !== row.id &&
+              ((personal && overview && row.start_date > overview.today) ||
+                (!personal && row.review)) && (
+                <button className="secondary" disabled={busy} onClick={() => setCancelling(row.id)}>
+                  Cancel leave
+                </button>
+              )}
+            {cancelling === row.id && row.status === 'approved' && (
+              <FocusForm
+                className="leave-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  const data = new FormData(event.currentTarget);
+                  void act(
+                    { action: 'cancelApproved', id: row.id, note: data.get('note') },
+                    'Approved leave cancelled. The days are back in the balance.',
+                  );
+                }}
+              >
+                <p>
+                  {personal
+                    ? 'Cancel this approved leave? The days go back into your balance and are removed from your attendance.'
+                    : `Cancel ${row.name}’s approved leave? The days go back into their balance and the leave entries are removed from attendance.`}
+                </p>
+                <label>
+                  {personal ? 'Reason (optional)' : 'Reason'}
+                  <textarea name="note" required={!personal} maxLength={500} />
+                </label>
+                <div className="leave-actions">
+                  <button className="primary" disabled={busy}>
+                    Cancel leave
+                  </button>
+                  <button className="secondary" type="button" onClick={() => setCancelling(null)}>
+                    Keep leave
+                  </button>
+                </div>
+              </FocusForm>
             )}
             {row.status === 'pending' && row.review && review !== row.id && (
               <button className="secondary" disabled={busy} onClick={() => setReview(row.id)}>
@@ -189,6 +238,15 @@ export function LeaveView() {
 
   const own = requests?.filter((row) => row.own) ?? [];
   const team = requests?.filter((row) => !row.own && row.status === 'pending') ?? [];
+  const teamApproved =
+    requests?.filter(
+      (row) =>
+        !row.own &&
+        row.review &&
+        row.status === 'approved' &&
+        overview !== null &&
+        row.end_date >= overview.today,
+    ) ?? [];
 
   return (
     <div className="leave-view">
@@ -286,6 +344,13 @@ export function LeaveView() {
         <section className="leave-section">
           <h2>Awaiting your review</h2>
           {list(team, false)}
+        </section>
+      )}
+      {teamApproved.length > 0 && (
+        <section className="leave-section">
+          <h2>Approved team leave</h2>
+          <p className="muted">Current and upcoming leave you can cancel if plans change.</p>
+          {list(teamApproved, false)}
         </section>
       )}
       <section className="leave-section">

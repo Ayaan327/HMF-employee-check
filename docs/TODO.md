@@ -35,4 +35,6 @@
 - [ ] Rename package from `site-creator-vinext-starter`
 
 ## Later features
-Partial-day/hourly leave, approved-leave cancellation/amendment, more leave types, accrual/proration, carry expiry, reminders, retention.
+- [x] Cancel approved leave (employee before it starts; manager/HR any time with a reason)
+
+Partial-day/hourly leave, amending approved leave (change dates), more leave types, accrual/proration, carry expiry, reminders, retention.
