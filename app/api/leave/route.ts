@@ -1,14 +1,6 @@
 import { databaseConflict } from '../../lib/conflicts';
 import { getPlatformUser } from '../../platform-auth';
-import {
-  dayInZone,
-  effectiveSchedule,
-  InputError,
-  paidMinutes,
-  requireValue,
-  textValue,
-  validDate,
-} from '../../lib/core';
+import { dayInZone, InputError, requireValue, textValue, validDate } from '../../lib/core';
 import { chargeLeave, chargeTotal, leaveDates, type LeaveCharge } from '../../lib/leave';
 import {
   audit,

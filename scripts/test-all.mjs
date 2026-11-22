@@ -7,6 +7,7 @@ function run(command,args) {
   if(result.status!==0) process.exit(result.status||1);
 }
 run(process.execPath,['node_modules/typescript/bin/tsc','--noEmit']);
+run(process.execPath,['node_modules/eslint/bin/eslint.js','.','--quiet']);
 run(process.execPath,['node_modules/prettier/bin/prettier.cjs','--check','app','db/schema.ts','tests','playwright.config.ts']);
 run(process.execPath,['--no-warnings','--test',...readdirSync('scripts').filter(n=>/^test-(core|hours|leave|design|identity|backup)\.mjs$/.test(n)).map(n=>'scripts/'+n)]);
 run('python3',['scripts/test-migrations.py']);

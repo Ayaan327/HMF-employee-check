@@ -12,19 +12,13 @@ import {
   PrivacyNotice,
   useWorkforce,
   workforce,
-  roleLabel,
 } from './workforce';
 import {
   ArrowRight,
-  ArrowUpRight,
   Check,
   CheckCircle2,
   X,
-  CircleHelp,
-  Users,
-  LayoutDashboard,
   CalendarDays,
-  Building2,
   LogOut,
   Search,
   Download,
@@ -32,16 +26,9 @@ import {
   ChevronRight,
   ChevronDown,
   Clock3,
-  ShieldCheck,
-  Globe2,
-  RefreshCw,
   Eye,
   EyeOff,
-  MapPin,
   Mail,
-  FileCheck2,
-  Info,
-  Menu,
 } from 'lucide-react';
 type User = {
   id: string;
@@ -102,7 +89,7 @@ type ApiData = {
   auth?: AuthInfo;
   identityEmail?: string;
 };
-type AuthInfo = { mode: string; sso: boolean; signOutUrl: string | null };
+type AuthInfo = { mode: string; sso: boolean; signOutUrl: string | null; demo?: boolean };
 // Set from the server's answers; decides where an expired session sends the browser.
 let authMode = 'sites';
 const officeName = (o: string) => (o === 'PK' ? 'Pakistan' : o === 'UK' ? 'United Kingdom' : o);
@@ -240,11 +227,19 @@ export default function Portal() {
         onLogin={signedIn}
         initialError={fatal}
         sso={auth?.sso ? { email: identityEmail, retry: microsoftSignIn } : null}
+        demo={Boolean(auth?.demo)}
       />
     );
   return (
     <WorkforceProvider>
-      <Workspace me={me} today={today} officeDates={officeDates} logout={logout} fatal={fatal} />
+      <Workspace
+        me={me}
+        today={today}
+        officeDates={officeDates}
+        logout={logout}
+        fatal={fatal}
+        demo={Boolean(auth?.demo)}
+      />
     </WorkforceProvider>
   );
 }
@@ -261,10 +256,12 @@ function Login({
   onLogin,
   initialError,
   sso,
+  demo,
 }: {
   onLogin: (d: any) => void;
   initialError: string;
   sso: { email: string; retry: () => Promise<void> } | null;
+  demo: boolean;
 }) {
   const [step, setStep] = useState(1),
     [email, setEmail] = useState(''),
@@ -343,7 +340,7 @@ function Login({
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@hmf.example"
+                placeholder={demo ? 'you@hmf.example' : undefined}
                 required
                 autoFocus
               />
@@ -407,11 +404,17 @@ function Login({
         </button>
       )}
       <footer className="simple-login-footer fine-print">
-        Private demo · HMF Consultants
-        <br />
-        Demo accounts: admin@hmf.example · employee.uk@hmf.example · employee.pk@hmf.example
-        <br />
-        Use the demo password supplied by your administrator.
+        {demo ? (
+          <>
+            Private demo · HMF Consultants
+            <br />
+            Demo accounts: admin@hmf.example · employee.uk@hmf.example · employee.pk@hmf.example
+            <br />
+            Use the demo password supplied by your administrator.
+          </>
+        ) : (
+          <>HMF Consultants · Trouble signing in? Contact HMF IT.</>
+        )}
       </footer>
     </main>
   );
@@ -422,12 +425,14 @@ function Workspace({
   officeDates,
   logout,
   fatal,
+  demo,
 }: {
   me: User;
   today: string;
   officeDates: Record<string, string>;
   logout: () => void;
   fatal: string;
+  demo: boolean;
 }) {
   const admin = me.canViewTeam;
   const [view, setView] = useState(admin ? 'overview' : 'attendance');
@@ -517,7 +522,7 @@ function Workspace({
         <footer className="app-footer fine-print">
           <div>
             <span>HMF Consultants</span>
-            <p>Private demo · Fictional employees</p>
+            {demo && <p>Private demo · Fictional employees</p>}
           </div>
           <PrivacyNotice />
         </footer>
@@ -1359,87 +1364,5 @@ function EmployeeDetail({
         )}
       </details>
     </dialog>
-  );
-}
-function Offices() {
-  return (
-    <>
-      <div className="page-heading">
-        <div>
-          <h1>Our offices</h1>
-          <p className="muted">One HMF workspace, with local dates for every team.</p>
-        </div>
-      </div>
-      <div className="office-cards">
-        {[
-          [
-            'UK',
-            'United Kingdom',
-            'Europe/London',
-            'Citibase – Copthall House, Kings Street, Newcastle-under-Lyme, ST5 1EL',
-            'UK local time adjusts automatically for daylight saving.',
-          ],
-          [
-            'PK',
-            'Pakistan',
-            'Asia/Karachi',
-            'Karachi · Lahore · Islamabad',
-            'All Pakistan offices use Pakistan Standard Time.',
-          ],
-        ].map(([key, name, tz, address, note]) => (
-          <section className="office-card" key={key}>
-            <div className="office-card-top">
-              <span className={'flag ' + key} />
-              <span>HMF {key}</span>
-              <Globe2 size={24} />
-            </div>
-            <h2>{name}</h2>
-            <p>
-              <MapPin size={17} />
-              {address}
-            </p>
-            <dl>
-              <dt>Time zone</dt>
-              <dd>{tz}</dd>
-              <dt>Demo employees</dt>
-              <dd>12</dd>
-              <dt>Submission policy</dt>
-              <dd>Today only</dd>
-            </dl>
-            <div className="info-strip">
-              <Clock3 size={16} />
-              <span>{note}</span>
-            </div>
-          </section>
-        ))}
-      </div>
-      <details className="policy-card">
-        <summary>How attendance works</summary>
-        <div className="policy-grid">
-          <div>
-            <h3>A daily check-in</h3>
-            <p>Employees choose present, absent or other. Other requires a short explanation.</p>
-          </div>
-          <div>
-            <h3>One record per day</h3>
-            <p>
-              Submitting again updates today’s record. Historical changes are made by an
-              administrator with a reason.
-            </p>
-          </div>
-          <div>
-            <h3>A clear record</h3>
-            <p>
-              The server records timestamps. No response stays separate from absence. Payroll and
-              hours worked are not tracked.
-            </p>
-          </div>
-        </div>
-        <p className="muted">
-          Workweek, holiday and cutoff policies are not configured in this demo. Both countries are
-          available for daily testing.
-        </p>
-      </details>
-    </>
   );
 }

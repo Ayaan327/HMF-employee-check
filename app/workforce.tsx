@@ -7,18 +7,12 @@ import { EmployeeEditor } from './employee-editor';
 import { HoursSettings } from './hours-ui';
 import {
   blankDays,
-  blankProfile,
-  defaultOffices,
-  defaultStatuses,
   paidMinutes,
   roles,
   weeklyMinutes,
   type Day,
-  type Office,
-  type Profile,
   type Role,
   type Schedule,
-  type Status,
 } from './lib/core';
 import type { Person } from './lib/store';
 
@@ -41,9 +35,12 @@ async function download(url: string, name: string) {
   URL.revokeObjectURL(object);
 }
 
+type DirectoryPerson = Person & { microsoft?: { email: string; lastSeenAt: string } | null };
+
 export function People() {
   const { config, reload } = useWorkforce(),
-    [people, setPeople] = useState<Person[]>([]),
+    [people, setPeople] = useState<DirectoryPerson[]>([]),
+    [microsoftSignIn, setMicrosoftSignIn] = useState(false),
     [search, setSearch] = useState(''),
     [office, setOffice] = useState(''),
     [status, setStatus] = useState(''),
@@ -62,6 +59,7 @@ export function People() {
       .then((d) => {
         if (live) {
           setPeople(d.people);
+          setMicrosoftSignIn(Boolean(d.microsoftSignIn));
           setError('');
         }
       })
@@ -208,7 +206,16 @@ export function People() {
                     <small className="sample-label">{p.department}</small>
                   </td>
                   <td>{p.profile.employmentStatus}</td>
-                  <td>{p.roles.map((r) => roleLabel[r]).join(', ')}</td>
+                  <td>
+                    {p.roles.map((r) => roleLabel[r]).join(', ')}
+                    {microsoftSignIn && (
+                      <small className="sample-label">
+                        {p.microsoft
+                          ? 'Microsoft sign-in · last ' + timestamp(p.microsoft.lastSeenAt)
+                          : 'Not signed in with Microsoft yet'}
+                      </small>
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -223,7 +230,11 @@ export function People() {
           <p className="panel-message">No matching employees. Try clearing your filters.</p>
         )}
         <div className="table-footer">
-          <span>{filtered.length} employees</span>
+          <span>
+            {filtered.length} employees
+            {microsoftSignIn &&
+              ` · ${filtered.filter((p) => p.microsoft).length} have signed in with Microsoft`}
+          </span>
           <div>
             <button
               className="secondary"
@@ -365,6 +376,16 @@ export function ProfileView({ id, close }: { id?: string; close?: () => void }) 
             value={profile.carriedForward}
           />
           <Value label="Access roles" value={p.roles.map((r) => roleLabel[r]).join(', ')} />
+          {data.microsoft !== undefined && (
+            <Value
+              label="Microsoft 365 sign-in"
+              value={
+                data.microsoft
+                  ? `${data.microsoft.email} · last used ${timestamp(data.microsoft.lastSeenAt)}`
+                  : 'Not used yet'
+              }
+            />
+          )}
           <Value label="Account created" value={timestamp(p.createdAt)} />
           <Value label="Profile updated" value={timestamp(p.updatedAt)} />
         </dl>

@@ -1,5 +1,5 @@
 import { databaseConflict } from '../../lib/conflicts';
-import { getPlatformUser } from '../../platform-auth';
+import { authConfig, getPlatformUser } from '../../platform-auth';
 import {
   blankProfile,
   csv,
@@ -20,7 +20,6 @@ import {
   weeklyMinutes,
   type Profile,
   type Role,
-  type Status,
 } from '../../lib/core';
 import {
   audit,
@@ -44,6 +43,25 @@ import {
 } from '../../lib/store';
 
 export const dynamic = 'force-dynamic';
+type SignInLink = { email: string; lastSeenAt: string };
+// Microsoft 365 sign-in status per employee. Shown only to HR / system administrators,
+// and only once Microsoft sign-in is switched on (it is personal access-monitoring data).
+async function microsoftLinks(me: Person, ids: string[]): Promise<Map<string, SignInLink> | null> {
+  if (!manages(me) || authConfig().mode !== 'cloudflare-access') return null;
+  const rows = (
+    await db()
+      .prepare(
+        'SELECT employee_id, email, MAX(last_seen_at) AS last_seen_at FROM identity_links GROUP BY employee_id',
+      )
+      .all<{ employee_id: string; email: string; last_seen_at: string }>()
+  ).results;
+  const wanted = new Set(ids);
+  return new Map(
+    rows
+      .filter((r) => wanted.has(r.employee_id))
+      .map((r) => [r.employee_id, { email: r.email, lastSeenAt: r.last_seen_at }]),
+  );
+}
 const json = (data: unknown, status = 200) =>
   Response.json(data, { status, headers: { 'Cache-Control': 'no-store' } });
 const fail = (error: unknown) => {
@@ -137,7 +155,14 @@ export async function GET(req: Request) {
             p.roles.join('; '),
           ]),
         ]);
-      return json({ people: rows });
+      const links = await microsoftLinks(
+        me,
+        rows.map((p) => p.id),
+      );
+      return json({
+        people: links ? rows.map((p) => ({ ...p, microsoft: links.get(p.id) ?? null })) : rows,
+        microsoftSignIn: Boolean(links),
+      });
     }
     if (action === 'template') {
       requireValue(manages(me), 'Employee management access is required.', 403);
@@ -148,13 +173,16 @@ export async function GET(req: Request) {
       return json({ templates: currentVersions(versions), versions });
     }
     const target = targetFor(me, people, query.get('id') || me.id);
-    if (action === 'profile')
+    if (action === 'profile') {
+      const links = target.id === me.id ? null : await microsoftLinks(me, [target.id]);
       return json({
         person: safePerson(me, target),
+        microsoft: links ? (links.get(target.id) ?? null) : undefined,
         canEdit: employmentAccess(me, target),
         canSchedule: team(me) && scope(me, target) && (target.id !== me.id || manages(me)),
         today: dayInZone(target.timezone),
       });
+    }
     if (action === 'schedules') {
       const date = query.get('date') || dayInZone(target.timezone);
       requireValue(validDate(date), 'Choose a valid date.');

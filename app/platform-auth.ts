@@ -40,6 +40,8 @@ export function clientAuth() {
     mode: config.mode,
     sso: config.mode === 'cloudflare-access',
     signOutUrl: config.mode === 'cloudflare-access' ? accessSignOutPath : null,
+    // Demo hints (fictional accounts, "Private demo") only appear when demo seeding is on.
+    demo: (env as unknown as { HMF_DEMO_MODE?: string }).HMF_DEMO_MODE === 'true',
   };
 }
 
