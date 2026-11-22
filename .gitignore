@@ -46,3 +46,6 @@ yarn-error.log*
 /preview/node_modules/
 /preview/dist/
 /HMF-employee-check-backup.zip
+
+# Database backups contain personal data: keep them out of git
+/backups/

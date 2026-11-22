@@ -21,7 +21,8 @@
 - [x] Staging/production deploy settings, generator, setup guide (`deploy/README.md`), first-admin script
 - [ ] Run the staging setup on HMF's real Cloudflare + Entra (needs HMF accounts)
 - [ ] Admin UI to view/remove a Microsoft sign-in link (links are audited; currently managed by email)
-- [ ] Backup export script and restore drill procedure
+- [x] Backup script, restore drill (`npm run db:backup`, `npm run db:restore-check`) and guide (`docs/BACKUPS.md`)
+- [ ] HMF: choose restricted storage for backups and who runs them; first production backup + drill before go-live
 - [ ] Put this folder in an HMF GitHub repo so CI runs
 
 ## Cleanup

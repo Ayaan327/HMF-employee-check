@@ -13,9 +13,11 @@
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
     "test": "node scripts/test-all.mjs",
-    "test:unit": "node --test scripts/test-core.mjs scripts/test-hours.mjs scripts/test-leave.mjs scripts/test-design.mjs scripts/test-identity.mjs",
+    "test:unit": "node --no-warnings --test scripts/test-core.mjs scripts/test-hours.mjs scripts/test-leave.mjs scripts/test-design.mjs scripts/test-identity.mjs scripts/test-backup.mjs",
     "test:browser": "playwright test",
     "test:prepare": "node scripts/prepare-test-db.mjs",
+    "db:backup": "node --no-warnings scripts/db-backup.mjs",
+    "db:restore-check": "node --no-warnings scripts/db-restore-check.mjs",
     "format": "prettier --write app db/schema.ts tests playwright.config.ts",
     "format:check": "prettier --check app db/schema.ts tests playwright.config.ts"
   },

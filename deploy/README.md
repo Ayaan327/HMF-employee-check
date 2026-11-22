@@ -67,8 +67,8 @@ Without `HMF_AUTH_MODE` set, the deployed app refuses every request. It cannot b
 ## Production
 
 Same steps with `deploy/production.json`, the `hmf-attendance-prod` database, and an Access
-application on the company domain. Before real staff use it, set up backups and test a restore
-(see `docs/HOSTING-M365-DOMAIN-ASSESSMENT.md`, step D).
+application on the company domain. Before real staff use it, take a backup and pass the restore
+check (see `docs/BACKUPS.md`).
 
 ## Company domain
 

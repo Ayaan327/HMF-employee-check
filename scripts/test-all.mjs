@@ -8,7 +8,7 @@ function run(command,args) {
 }
 run(process.execPath,['node_modules/typescript/bin/tsc','--noEmit']);
 run(process.execPath,['node_modules/prettier/bin/prettier.cjs','--check','app','db/schema.ts','tests','playwright.config.ts']);
-run(process.execPath,['--test',...readdirSync('scripts').filter(n=>/^test-(core|hours|leave|design|identity)\.mjs$/.test(n)).map(n=>'scripts/'+n)]);
+run(process.execPath,['--no-warnings','--test',...readdirSync('scripts').filter(n=>/^test-(core|hours|leave|design|identity|backup)\.mjs$/.test(n)).map(n=>'scripts/'+n)]);
 run('python3',['scripts/test-migrations.py']);
 try {
   const response=await fetch('http://127.0.0.1:5173/',{redirect:'manual',signal:AbortSignal.timeout(5000)});
