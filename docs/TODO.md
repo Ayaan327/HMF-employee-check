@@ -13,6 +13,9 @@
 - [x] Email-code sign-in wording (`HMF_SIGNIN_NAME`), demo deploy settings (`deploy/demo.json`)
 - [x] Tester setup script (`scripts/demo-testers-sql.mjs`) and guide (`docs/DEMO-SETUP.md`)
 - [ ] Ayaan: run docs/DEMO-SETUP.md with ~10 testers for several days before the pitch
+- [x] Captioned training videos for staff and managers (`docs/TRAINING-VIDEOS.md`)
+- [x] Demo deployed: https://hmf-attendance-demo.ayaan-hmf-demo.workers.dev (Ayaan as admin)
+- [ ] Add testers (app + Access policy); tester task list
 - [ ] Usage report for the pitch; one-page summary / slides
 
 ## Blocked on HMF decisions (see assessment, section 5)

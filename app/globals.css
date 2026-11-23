@@ -1444,6 +1444,17 @@ dialog::backdrop {
   flex-basis: 100%;
   color: var(--muted);
 }
+/* Holiday rows: name on the left, date on the right. */
+.leave-list li:has(> time) {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s4);
+}
+.leave-list li > time {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
 .leave-list li > button {
   margin-top: var(--s2);
 }
