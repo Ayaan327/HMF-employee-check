@@ -3,9 +3,9 @@
   "workerName": "hmf-attendance-demo",
   "accountId": "b4d479c1001a0b74dabead713fee383a",
   "d1DatabaseName": "hmf-attendance-demo",
-  "d1DatabaseId": "REPLACE_WITH_D1_DATABASE_ID",
+  "d1DatabaseId": "77854e65-8e45-4f31-8f7e-cb764730db10",
   "accessTeamDomain": "dry-salad-d8b4.cloudflareaccess.com",
-  "accessAud": "REPLACE_WITH_ACCESS_APPLICATION_AUD_TAG",
+  "accessAud": "13496e23ab310d53ad033cbe5888dc6e6fe59151c8d78c3a86a69f1589edb9b2",
   "passwordLogin": "system-admins",
   "signInName": "email code",
   "customDomain": null
