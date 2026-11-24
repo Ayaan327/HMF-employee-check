@@ -2,7 +2,7 @@
 //   node scripts/demo-testers-sql.mjs deploy/my-testers.csv > demo-testers.sql
 // CSV columns: name,email,office,role,manager,department,job title
 //   office: UK or PK · role: employee | manager | hr | admin · manager: the manager's email (optional)
-// Options: --allowance 25 (demo leave days per person) --year-start / --year-end (default: 12 months
+// Options: --start 1 (first DEMO-NN number; use the next free one for later batches) --allowance 25 (demo leave days per person) --year-start / --year-end (default: 12 months
 //          from the first day of this month)
 //          --actor HMF-ADMIN-1 (an existing system administrator recorded as the creator in the audit trail)
 // Testers sign in with their own email (Cloudflare Access one-time code); nobody gets a password.
@@ -35,6 +35,12 @@ const allowance = Number(option('allowance', '25'));
 const yearStart = option('year-start', defaultStart.toISOString().slice(0, 10));
 const yearEnd = option('year-end', defaultEnd.toISOString().slice(0, 10));
 const actor = option('actor', 'HMF-ADMIN-1');
+// --start N: first DEMO-NN number, so testers can be added in several batches without clashing IDs.
+const startNumber = Number(option('start', '1'));
+if (!Number.isInteger(startNumber) || startNumber < 1 || startNumber > 900) {
+  console.error('Not created: --start must be a whole number from 1.');
+  process.exit(1);
+}
 const fail = (message) => {
   console.error('Not created: ' + message);
   process.exit(1);
@@ -84,7 +90,7 @@ const people = rows.map((row, i) => {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fail(`${line}: "${row.email}" is not an email address.`);
   if (!offices.has(office)) fail(`${line}: office must be UK or PK.`);
   if (!roleSets[role]) fail(`${line}: role must be employee, manager, hr or admin.`);
-  return { line, id: `DEMO-${String(i + 1).padStart(2, '0')}`, name, email, office, role, managerEmail: (row.manager || '').trim().toLowerCase(), department: (row.department || '').trim() || 'Engineering', jobTitle: (row['job title'] || '').trim() };
+  return { line, id: `DEMO-${String(startNumber + i).padStart(2, '0')}`, name, email, office, role, managerEmail: (row.manager || '').trim().toLowerCase(), department: (row.department || '').trim() || 'Engineering', jobTitle: (row['job title'] || '').trim() };
 });
 const byEmail = new Map(people.map((p) => [p.email, p]));
 if (byEmail.size !== people.length) fail('two testers share an email address.');
