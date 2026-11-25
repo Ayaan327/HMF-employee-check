@@ -140,6 +140,29 @@ function policyGuard(office: string, raw: string) {
     .bind(office, raw);
 }
 
+// Dates in a leave charge on which the employee already has working time recorded. Leave and
+// worked time cannot share a day, so these are refused with a clear message, not a conflict.
+async function workedDates(employeeId: string, dates: string[]) {
+  if (!dates.length) return [];
+  const rows = await db()
+    .prepare(
+      'SELECT date FROM work_records WHERE employee_id=? AND date IN (SELECT value FROM json_each(?)) ORDER BY date',
+    )
+    .bind(employeeId, JSON.stringify(dates))
+    .all<{ date: string }>();
+  return rows.results.map((r) => r.date);
+}
+const dayList = (dates: string[]) =>
+  dates
+    .map((d) =>
+      new Date(d + 'T12:00:00Z').toLocaleDateString('en-GB', {
+        timeZone: 'UTC',
+        day: 'numeric',
+        month: 'short',
+      }),
+    )
+    .join(', ');
+
 type LeaveRequest = {
   snapshot: string | null;
   note: string | null;
@@ -357,6 +380,15 @@ export async function POST(req: Request) {
         policy,
         await schedules(me.id),
       );
+      const worked = await workedDates(
+        me.id,
+        charge.days.map((d) => d.date),
+      );
+      requireValue(
+        !worked.length,
+        `You have working time recorded on ${dayList(worked)}. Choose dates you did not work, or ask for a time correction first.`,
+        409,
+      );
       const total = chargeTotal(charge),
         balance = await balanceFor(me, existing, policy);
       requireValue(total > 0, 'These dates contain no scheduled working time.');
@@ -507,6 +539,15 @@ export async function POST(req: Request) {
         'This request belongs to a different leave period. Ask HR to review it.',
       );
       const charge = await chargeFor(row, employee, policy);
+      const worked = await workedDates(
+        employee.id,
+        charge.days.map((d) => d.date),
+      );
+      requireValue(
+        !worked.length,
+        `${employee.name} has working time recorded on ${dayList(worked)}, so this leave cannot be approved as requested. Decline it and ask them to request the remaining days.`,
+        409,
+      );
       const balance = await balanceFor(employee, await employeeRequests(employee.id), policy);
       requireValue(
         balance.available !== null && balance.available >= -0.000001,

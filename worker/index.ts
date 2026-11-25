@@ -2,6 +2,28 @@ import handler from "vinext/server/fetch-handler";
 import { runWithConnectorBinding } from "../lib/connector-context";
 import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 
+// Browser-side hardening for every page and API response: the portal must never be framed by
+// another site (clickjacking), browsers must not guess content types, and once seen over HTTPS
+// the site is HTTPS-only. Scripts are not restricted by CSP here because the framework inlines
+// its hydration data; React escaping and server-side checks cover injection.
+const securityHeaders: Record<string, string> = {
+  "Content-Security-Policy": "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'",
+  "X-Frame-Options": "DENY",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "same-origin",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  "Cross-Origin-Opener-Policy": "same-origin",
+};
+
+async function harden(response: Response, request: Request): Promise<Response> {
+  if (response.status === 101) return response;
+  const secured = new Response(response.body, response);
+  for (const [name, value] of Object.entries(securityHeaders)) secured.headers.set(name, value);
+  if (new URL(request.url).protocol === "https:")
+    secured.headers.set("Strict-Transport-Security", "max-age=31536000");
+  return secured;
+}
+
 const worker = {
   fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
     let binding = ctx.props?.CONNECTORS;
@@ -23,7 +45,9 @@ const worker = {
         },
       };
     }
-    return runWithConnectorBinding(binding, () => handler.fetch(request, env, ctx));
+    return runWithConnectorBinding(binding, async () =>
+      harden(await handler.fetch(request, env, ctx), request),
+    );
   },
 };
 

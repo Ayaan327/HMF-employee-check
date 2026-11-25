@@ -15,7 +15,9 @@
 - [ ] Ayaan: run docs/DEMO-SETUP.md with ~10 testers for several days before the pitch
 - [x] Captioned training videos for staff and managers (`docs/TRAINING-VIDEOS.md`)
 - [x] Demo deployed: https://hmf-attendance-demo.ayaan-hmf-demo.workers.dev (Ayaan as admin)
-- [ ] Add testers (app + Access policy); tester task list
+- [x] Testers added in batches (app + Access policy)
+- [x] Security review and fixes (`docs/SECURITY-REVIEW.md`)
+- [ ] Before production: re-run `npm audit`, upgrade flagged packages, add rate limiting on HMF's domain
 - [ ] Usage report for the pitch; one-page summary / slides
 
 ## Blocked on HMF decisions (see assessment, section 5)

@@ -35,6 +35,8 @@ config.name = input.workerName;
 config.topLevelName = input.workerName;
 config.account_id = input.accountId;
 config.workers_dev = env !== 'production';
+// No per-version preview addresses: the only way in is the address behind the sign-in gate.
+config.preview_urls = false;
 config.d1_databases = [
   { binding: 'DB', database_name: input.d1DatabaseName, database_id: input.d1DatabaseId, migrations_dir: '../../drizzle' },
 ];
