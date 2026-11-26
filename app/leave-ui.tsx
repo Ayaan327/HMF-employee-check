@@ -1,6 +1,7 @@
 'use client';
 
 import { FocusForm } from './focus-form';
+import { sessionEnded } from './session-expiry';
 import { useEffect, useState, type FormEvent } from 'react';
 
 type RequestRow = {
@@ -55,6 +56,7 @@ async function leaveApi(body?: object, office = '') {
       : { cache: 'no-store' },
   );
   const data = (await response.json()) as LeaveOverview & { error?: string };
+  sessionEnded(response.status);
   if (!response.ok) throw new Error(data.error || 'Unable to load leave.');
   return data;
 }

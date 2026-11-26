@@ -1,5 +1,6 @@
 'use client';
 
+import { sessionEnded } from './session-expiry';
 import { useState, type FormEvent } from 'react';
 
 export function Reports({ today }: { today: string }) {
@@ -18,6 +19,7 @@ export function Reports({ today }: { today: string }) {
     try {
       const route = hours ? '/api/hours?action=export&team=true' : '/api/portal?action=report';
       const response = await fetch(route + '&' + query);
+      sessionEnded(response.status);
       if (!response.ok) {
         const problem = (await response.json().catch(() => null)) as { error?: string } | null;
         throw new Error(problem?.error || 'Unable to download this report.');

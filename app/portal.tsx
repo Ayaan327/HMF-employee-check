@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { WorkClock, HoursView } from './hours-ui';
 import { LeaveView } from './leave-ui';
 import { Reports } from './reports';
+import { markSignedIn, sessionEnded } from './session-expiry';
 import {
   WorkforceProvider,
   People,
@@ -156,6 +157,7 @@ async function api(action: string, body?: object, query = '') {
       : { cache: 'no-store' },
   );
   const data = (await response.json()) as ApiData;
+  if (sessionEnded(response.status)) throw new Error('Your session ended. Signing you back in…');
   if (!response.ok) {
     if (data.signIn) {
       // Sites serves its own sign-in route; behind Cloudflare Access a reload re-authenticates.
@@ -175,6 +177,7 @@ export default function Portal() {
     [auth, setAuth] = useState<AuthInfo | null>(null),
     [identityEmail, setIdentityEmail] = useState('');
   function signedIn(d: ApiData) {
+    markSignedIn(Boolean(d.user));
     setMe(d.user);
     setToday(d.today);
     setOfficeDates(d.officeDates);
@@ -211,6 +214,7 @@ export default function Portal() {
   async function logout() {
     try {
       await api('logout', {});
+      markSignedIn(false);
       // Behind Microsoft 365 sign-in, also end the Cloudflare Access session; otherwise the
       // next visit would sign the same person straight back in.
       if (auth?.signOutUrl) window.location.assign(auth.signOutUrl);
@@ -619,6 +623,7 @@ function Admin({
           onClick={async () => {
             try {
               const r = await fetch('/api/portal?action=export&date=' + date + '&office=' + office);
+              sessionEnded(r.status);
               if (!r.ok) throw new Error('Export failed. Please sign in again.');
               const url = URL.createObjectURL(await r.blob());
               const a = document.createElement('a');

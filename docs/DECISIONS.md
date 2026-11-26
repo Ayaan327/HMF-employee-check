@@ -21,3 +21,4 @@
 | 2026-11-25 | Security headers added in the Worker (anti-framing, nosniff, HSTS, etc.); no script CSP because the framework inlines hydration data | Blocks clickjacking without breaking rendering |
 | 2026-11-25 | Leave cannot cover a day with recorded working time: refused at request with a clear message, and approvers see why | A real tester hit this; the old generic conflict error was confusing |
 | 2026-11-25 | Flagged dependency advisories documented, not upgraded mid-trial; none reach the deployed bundle | Avoids build-tool churn before the pitch; revisit before production |
+| 2026-11-26 | When an API call returns 401 while signed in, the page reloads once (guarded against loops) so sign-in re-runs; failed logins unaffected | Live logs showed an open admin tab polling 101 times after the 8-hour session ended without recovering |

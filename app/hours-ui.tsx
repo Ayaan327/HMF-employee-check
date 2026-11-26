@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useWorkforce } from './workforce-context';
+import { sessionEnded } from './session-expiry';
 import { defaultHoursPolicy, localWall, wallCandidates, type HoursPolicy } from './lib/hours';
 export async function hoursApi(action: string, body?: object, query = ''): Promise<any> {
   const r = await fetch(
@@ -14,6 +15,7 @@ export async function hoursApi(action: string, body?: object, query = ''): Promi
       : { cache: 'no-store' },
   );
   const d: any = await r.json();
+  sessionEnded(r.status);
   if (!r.ok) throw new Error(d.error || 'Unable to load working hours.');
   return d;
 }
@@ -287,6 +289,7 @@ export function HoursView({ teamView = false }: { teamView?: boolean }) {
   async function exportCsv() {
     try {
       const r = await fetch(`/api/hours?action=export&team=${teamView}&start=${start}&end=${end}`);
+      sessionEnded(r.status);
       if (!r.ok) throw new Error('Unable to export these hours.');
       const url = URL.createObjectURL(await r.blob()),
         a = document.createElement('a');

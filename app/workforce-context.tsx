@@ -1,5 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
+import { sessionEnded } from './session-expiry';
 import { defaultOffices, defaultStatuses, type Office, type Role, type Status } from './lib/core';
 export const roleLabel: Record<string, string> = {
   employee: 'Employee',
@@ -27,6 +28,7 @@ export async function workforce(action: string, body?: unknown, query = ''): Pro
       : { cache: 'no-store' },
   );
   const data: any = await response.json();
+  sessionEnded(response.status);
   if (!response.ok)
     throw new Error(data.error || 'Unable to load this information. Please sign in again.');
   return data;
